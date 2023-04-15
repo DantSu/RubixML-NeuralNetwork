@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Domain\DeepLearning\NeuralNetwork;
+namespace App\Domain\DeepLearning\NeuralNetwork\Visualizers;
 
 use DantSu\PHPImageEditor\Image;
-use JetBrains\PhpStorm\Pure;
 
-class DataVisualizer
+class DatasetVisualizer
 {
     private int $width;
     private int $height;
@@ -48,7 +47,7 @@ class DataVisualizer
         return -1 * ($y - $this->originY) * $this->yPxValue;
     }
 
-    public function setLabelsValuesColors(array $colors): DataVisualizer
+    public function setLabelsValuesColors(array $colors): DatasetVisualizer
     {
         $this->colors = $colors;
         return $this;
@@ -59,7 +58,7 @@ class DataVisualizer
         return $this->colors[$value] ?? 'FFFFFF';
     }
 
-    public function setDataset(array $data): DataVisualizer
+    public function setDataset(array $data): DatasetVisualizer
     {
         $this->data = $data;
         $xs = \array_map(fn($v) => $v['x'], $this->data);

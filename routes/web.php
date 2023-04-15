@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Domain\DeepLearning\NeuralNetwork\MyNeuralNetwork;
+use App\Domain\DeepLearning\NeuralNetwork\MyFirstNeuralNetwork;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,14 +15,14 @@ use App\Domain\DeepLearning\NeuralNetwork\MyNeuralNetwork;
 */
 
 Route::get('/', fn() => view('welcome'));
-Route::get('/linear-train-dataset', [MyNeuralNetwork::class, 'generateLinearTrainDataset']);
-Route::get('/linear-test-dataset', [MyNeuralNetwork::class, 'generateLinearTestDataset']);
-Route::get('/circle-train-dataset', [MyNeuralNetwork::class, 'generateCircleTrainDataset']);
-Route::get('/circle-test-dataset', [MyNeuralNetwork::class, 'generateCircleTestDataset']);
-Route::get('/two-circle-train-dataset', [MyNeuralNetwork::class, 'generateTwoCircleTrainDataset']);
-Route::get('/two-circle-test-dataset', [MyNeuralNetwork::class, 'generateTwoCircleTestDataset']);
-Route::get('/train-dataset-visualize', [MyNeuralNetwork::class, 'visualizeTrainDataset']);
-Route::get('/test-dataset-visualize', [MyNeuralNetwork::class, 'visualizeTestDataset']);
-Route::get('/neuralnetwork-train', [MyNeuralNetwork::class, 'train']);
-Route::get('/neuralnetwork-test', [MyNeuralNetwork::class, 'test']);
-Route::get('/neuralnetwork-visualize', [MyNeuralNetwork::class, 'visualizeNeuralNetworkPredictions']);
+Route::get('/linear-train-dataset', [MyFirstNeuralNetwork::class, 'generateLinearTrainDataset']);
+Route::get('/linear-test-dataset', [MyFirstNeuralNetwork::class, 'generateLinearTestDataset']);
+Route::get('/circle-train-dataset', [MyFirstNeuralNetwork::class, 'generateCircleTrainDataset']);
+Route::get('/circle-test-dataset', [MyFirstNeuralNetwork::class, 'generateCircleTestDataset']);
+Route::get('/two-circle-train-dataset', [MyFirstNeuralNetwork::class, 'generateTwoCircleTrainDataset']);
+Route::get('/two-circle-test-dataset', [MyFirstNeuralNetwork::class, 'generateTwoCircleTestDataset']);
+Route::get('/train-dataset-visualize', [MyFirstNeuralNetwork::class, 'visualizeTrainDataset']);
+Route::get('/test-dataset-visualize', [MyFirstNeuralNetwork::class, 'visualizeTestDataset']);
+Route::get('/neuralnetwork-train', [MyFirstNeuralNetwork::class, 'train']);
+Route::get('/neuralnetwork-test', [MyFirstNeuralNetwork::class, 'test']);
+Route::get('/neuralnetwork-visualize', [MyFirstNeuralNetwork::class, 'visualizeNeuralNetworkPredictions']);

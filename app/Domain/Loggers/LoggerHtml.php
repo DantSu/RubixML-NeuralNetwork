@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Domain\DeepLearning\NeuralNetwork;
-
+namespace App\Domain\Loggers;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
-class MyLogger implements LoggerInterface
+class LoggerHtml implements LoggerInterface
 {
     private array $messages = [];
 

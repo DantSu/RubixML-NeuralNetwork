@@ -15,22 +15,25 @@ use Rubix\ML\NeuralNet\Optimizers\Adam;
 use Rubix\ML\PersistentModel;
 use Rubix\ML\Persisters\Filesystem;
 use Rubix\ML\Serializers\RBX;
+use App\Domain\Loggers\LoggerHtml;
+use App\Domain\DeepLearning\NeuralNetwork\Visualizers\DatasetVisualizer;
 
-class MyNeuralNetwork
+class MyFirstNeuralNetwork
 {
     public function generateLinearTrainDataset()
     {
         $data = $this->generateLinearDataset(10000, true);
-        \file_put_contents(\storage_path('app/private/train_dataset.json'), view('json/dataset', ['data' => $data])->render());
+        DatasetFiles::saveTrain($data);
         $this->visualizeData($data);
     }
 
     public function generateLinearTestDataset()
     {
         $data = $this->generateLinearDataset(1000, false);
-        \file_put_contents(\storage_path('app/private/test_dataset.json'), view('json/dataset', ['data' => $data])->render());
+        DatasetFiles::saveTest($data);
         $this->visualizeData($data);
     }
+
 
     private function generateLinearDataset(int $nbData, bool $randomize): array
     {
@@ -49,21 +52,6 @@ class MyNeuralNetwork
             $data[] = ['x' => $x, 'y' => $y, 'v' => $a ? 'TOXIC' : 'EDIBLE'];
         }
         return $data;
-    }
-
-
-    public function generateCircleTrainDataset()
-    {
-        $data = $this->generateCircleDataset(10000, true);
-        \file_put_contents(\storage_path('app/private/train_dataset.json'), view('json/dataset', ['data' => $data])->render());
-        $this->visualizeData($data);
-    }
-
-    public function generateCircleTestDataset()
-    {
-        $data = $this->generateCircleDataset(1000, false);
-        \file_put_contents(\storage_path('app/private/test_dataset.json'), view('json/dataset', ['data' => $data])->render());
-        $this->visualizeData($data);
     }
 
     private function isInCircle(float $x, float $y, float $activation, float $randomActivation, float $bias1, float $bias2, float $bias3, float $bias4, float $bias5, float $bias6, float $bias7, float $bias8, bool $randomize): bool
@@ -85,6 +73,20 @@ class MyNeuralNetwork
         return $a;
     }
 
+    public function generateCircleTrainDataset()
+    {
+        $data = $this->generateCircleDataset(10000, true);
+        DatasetFiles::saveTrain($data);
+        $this->visualizeData($data);
+    }
+
+    public function generateCircleTestDataset()
+    {
+        $data = $this->generateCircleDataset(1000, false);
+        DatasetFiles::saveTest($data);
+        $this->visualizeData($data);
+    }
+
     private function generateCircleDataset(int $nbData, bool $randomize): array
     {
         $data = [];
@@ -102,18 +104,17 @@ class MyNeuralNetwork
         return $data;
     }
 
-
     public function generateTwoCircleTrainDataset()
     {
         $data = $this->generateTwoCircleDataset(10000, true);
-        \file_put_contents(\storage_path('app/private/train_dataset.json'), view('json/dataset', ['data' => $data])->render());
+        DatasetFiles::saveTrain($data);
         $this->visualizeData($data);
     }
 
     public function generateTwoCircleTestDataset()
     {
         $data = $this->generateTwoCircleDataset(1000, false);
-        \file_put_contents(\storage_path('app/private/test_dataset.json'), view('json/dataset', ['data' => $data])->render());
+        DatasetFiles::saveTest($data);
         $this->visualizeData($data);
     }
 
@@ -136,19 +137,19 @@ class MyNeuralNetwork
 
     public function visualizeTrainDataset()
     {
-        $this->visualizeData(\json_decode(\file_get_contents(\storage_path('app/private/train_dataset.json')), true));
+        $this->visualizeData(DatasetFiles::getTrain());
     }
 
     public function visualizeTestDataset()
     {
-        $this->visualizeData(\json_decode(\file_get_contents(\storage_path('app/private/test_dataset.json')), true));
+        $this->visualizeData(DatasetFiles::getTest());
     }
 
-    public function visualizeData(array $dataset, array $predictions = [])
+    public function visualizeData(array $dataset, array $predictions = []): MyFirstNeuralNetwork
     {
         \header("Content-Type: image/jpeg");
 
-        (new DataVisualizer(1280, 1280))
+        (new DatasetVisualizer(1280, 1280))
             ->setDataset($dataset)
             ->setLabelsValuesColors([
                 'TOXIC' => '9d00ee',
@@ -157,15 +158,16 @@ class MyNeuralNetwork
             ])
             ->draw($predictions)
             ->displayJPG(90);
+        return $this;
     }
 
 
     public function train(): string
     {
-        $myLogger = new MyLogger();
+        $logger = new LoggerHtml();
 
-        $dataTrain = \json_decode(\file_get_contents(\storage_path('app/private/train_dataset.json')), true);
-        $dataTest = \json_decode(\file_get_contents(\storage_path('app/private/test_dataset.json')), true);
+        $dataTrain = DatasetFiles::getTrain();
+        $dataTest = DatasetFiles::getTest();
 
         $labeledDataTrain = new Labeled(\array_map(fn($v) => [$v['x'], $v['y']], $dataTrain), \array_map(fn($v) => $v['v'], $dataTrain));
         $labeledDataTest = new Labeled(\array_map(fn($v) => [$v['x'], $v['y']], $dataTest), \array_map(fn($v) => $v['v'], $dataTest));
@@ -191,9 +193,9 @@ class MyNeuralNetwork
             new CrossEntropy(),
             new FBeta()
         );
-        $estimator->setLogger($myLogger);
+        $estimator->setLogger($logger);
         $estimator->train($labeledDataTrain);
-        $stackTrace = $myLogger->getStackTrace();
+        $stackTrace = $logger->getStackTrace();
 
         $predictions = $estimator->predict($labeledDataTest);
         $metric = new Accuracy();
@@ -224,7 +226,7 @@ class MyNeuralNetwork
             return;
         }
 
-        $dataTest = \json_decode(\file_get_contents(\storage_path('app/private/test_dataset.json')), true);
+        $dataTest = DatasetFiles::getTest();
         $labeledDataTest = new Labeled(\array_map(fn($v) => [$v['x'], $v['y']], $dataTest), \array_map(fn($v) => $v['v'], $dataTest));
         $predictions = $estimator->predict($labeledDataTest);
         $this->visualizeData($dataTest, $predictions);
@@ -238,10 +240,10 @@ class MyNeuralNetwork
             return;
         }
 
-        $dataVisualizer = new DataVisualizer(1280, 1280);
+        $dataVisualizer = new DatasetVisualizer(1280, 1280);
 
-        foreach($estimator->network()->layers() as $layer) {
-            if($layer instanceof Dense) {
+        foreach ($estimator->network()->layers() as $layer) {
+            if ($layer instanceof Dense) {
                 $params = $layer->parameters();
                 $fn = [];
                 foreach ($params as $k => $param) {
@@ -267,7 +269,7 @@ class MyNeuralNetwork
             }
         }
 
-        $dataset = \json_decode(\file_get_contents(\storage_path('app/private/test_dataset.json')), true);
+        $dataset = DatasetFiles::getTest();
         $dataVisualizer
             ->setDataset($dataset)
             ->setLabelsValuesColors([
